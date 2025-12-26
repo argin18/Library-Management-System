@@ -1,10 +1,21 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PopUp from "./PopUp";
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
+  const {setIsLogin}=useAuth()
   const [open, setOpen] = useState(false);
   const [data, setData] = useState(null);
+
+  const navigate=useNavigate();
+
+  const  logOut=()=>{
+    
+    setIsLogin(false)
+    navigate("/startPage/login")
+
+  }
 
   const openPopUp = (profile) => {
     setData(profile);
@@ -39,8 +50,10 @@ const Header = () => {
               Profile
             </span>
           </li>
-          <li className="cursor-pointer hover:underline">
-            <Link to="/login">Logout</Link>
+          <li 
+          onClick={logOut}
+           className="cursor-pointer hover:underline">
+           Logout
           </li>
         </ul>
       </header>

@@ -1,32 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import Dashboard from "./pages/Dashboard";
-import Login from "./pages/Login";
 import Books from "./pages/Books";
 import Member from "./pages/Member";
 import Issue from "./pages/Issue";
 import Return from "./pages/Return";
 import Report from "./pages/Report";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import StartPage from "./pages/StartPage";
+import { useAuth } from "./context/AuthContext";
 
 const App = () => {
+  const {isLogin}=useAuth()
+
   return (
     <div className="bg-gray-200">
-      <Routes>
+      
+        <Routes>
+        <Route path="/startPage/*" element={<StartPage  />}></Route>
+
+      {isLogin ?(
+        <>
         <Route path="/" element={<Dashboard />}></Route>
-        <Route path="/login" element={<Login />}></Route>
         <Route path="/books" element={<Books />}></Route>
         <Route path="/member" element={<Member />}></Route>
         <Route path="/issue" element={<Issue />}></Route>
         <Route path="/return" element={<Return />}></Route>
         <Route path="/report" element={<Report />}></Route>
+        </>
+      ):(
+        <Route path="*" element={<Navigate to="/startPage/login"/>}/>
+      )}
       </Routes>
-      {/* </> */}
-
-      {/* </> */}
-      {/* </> */}
-      {/* </> */}
-      {/* </> */}
-      {/* </> */}
     </div>
   );
 };
