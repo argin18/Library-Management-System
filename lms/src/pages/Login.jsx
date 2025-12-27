@@ -1,29 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom"; // <-- import useNavigate
 import { useForm } from "react-hook-form";
 import { useAuth } from '../context/AuthContext';
+import background from '../assets/background.jpg';
 
 const Login = () => {
   const {setIsLogin}=useAuth();
   const navigate = useNavigate(); 
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const [authErr, setAuthErr] = useState("")
 
   const onSubmit = (data) => {
     console.log("Login data", data);
     // Example validation
-    if (data.username === "argin18" && data.password === "Sumitbhujel") {
+    if (data.username === "argin18" && data.password === "Sumitbhujel" && data.role==="admin") {
       setIsLogin(true);
       navigate("/"); 
     } else {
-      alert("Invalid username or password");
+     setAuthErr("Invalid username, password or role..")   
     }
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-96">
-        <h1 className="text-3xl font-bold text-center mb-6">Login</h1>
-
+    <div
+    style={{ backgroundImage: `url(${background})` }}
+      className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center">
+      <div className="bg-white/55 shadow-lg rounded-2xl p-8 w-96">
+        <h1 className="text-3xl font-bold  text-center mb-6">Login</h1>
+        {
+          authErr && (
+            <p className='text-red-600 text-lg text-center font-semibold'>{authErr}</p>
+          )
+        }
         <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
           {/* Role Selection */}
           <div>
@@ -48,7 +56,7 @@ const Login = () => {
                 Librarian
               </label>
             </div>
-            {errors.role && <span className="text-red-500 text-sm">Role is required.</span>}
+            {errors.role && <span className=" text-lg">Role is required.</span>}
           </div>
 
           {/* Username */}
@@ -60,7 +68,7 @@ const Login = () => {
               {...register('username', { required: true })}
               className="border rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
             />
-            {errors.username && <span className="text-red-500 text-sm">Username is required.</span>}
+            {errors.username && <span className=" text-lg">Username is required.</span>}
           </div>
 
           {/* Password */}
@@ -71,7 +79,7 @@ const Login = () => {
               {...register('password', { required: true })}
               className="border rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
             />
-            {errors.password && <span className="text-red-500 text-sm">Password is required.</span>}
+            {errors.password && <span className=" text-lg">Password is required.</span>}
           </div>
 
           {/* Submit Button */}

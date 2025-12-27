@@ -69,7 +69,7 @@ const Report = () => {
                 <CalendarDays className="text-gray-500" />
                 <input
                   value={starDate}
-                  onChange={(e)=>setStarDate(e.target.value)}
+                  onChange={(e) => setStarDate(e.target.value)}
                   type="date"
                   className="outline-none text-sm"
                 />
@@ -78,7 +78,7 @@ const Report = () => {
                 <CalendarDays className="text-gray-500" />
                 <input
                   value={endDate}
-                  onChange={(e)=>setEndDate(e.target.value)}
+                  onChange={(e) => setEndDate(e.target.value)}
                   type="date"
                   className="outline-none text-sm"
                 />
@@ -107,26 +107,26 @@ const Report = () => {
               </thead>
 
               <tbody>
-                {filter.length ?(
+                {filter.length ? (
                   filter.map((d, idx) => (
-                  <tr key={idx} className="border-t hover:bg-gray-50">
-                    <td className="p-3">{d.id}</td>
-                    <td className="p-3">{d.type}</td>
-                    <td className="p-3">{d.description}</td>
-                    <td className="p-3">{d.date}</td>
-                    <td className="p-3">
-                      <button
-                        onClick={() => openPopUp(d)}
-                        className="flex gap-2 cursor-pointer  items-center text-blue-600 hover:underline"
-                      >
-                        <FileText size={18} /> View
-                      </button>
-                    </td>
-                  </tr>
-                ))
-                ):(
+                    <tr key={idx} className="border-t hover:bg-gray-50">
+                      <td className="p-3">{d.id}</td>
+                      <td className="p-3">{d.type}</td>
+                      <td className="p-3">{d.description}</td>
+                      <td className="p-3">{d.date}</td>
+                      <td className="p-3">
+                        <button
+                          onClick={() => openPopUp(d)}
+                          className="flex gap-2 cursor-pointer  items-center text-blue-600 hover:underline"
+                        >
+                          <FileText size={18} /> View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
                   <tr>
-                     <td colSpan="5" className="text-center p-4 text-gray-500">
+                    <td colSpan="5" className="text-center p-4 text-gray-500">
                       No reports found for selected date range.
                     </td>
                   </tr>

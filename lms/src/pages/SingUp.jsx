@@ -1,6 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
+import background from '../assets/background.jpg';
 
 const SignUp = () => {
   const navigate= useNavigate();
@@ -19,8 +20,10 @@ const SignUp = () => {
     navigate("/startPage/login")
   };
   return (
-   <div className="w-screen h-screen flex items-center justify-center bg-gray-100">
-  <div className="bg-white p-8 rounded-2xl shadow-lg w-96">
+   <div style={{ backgroundImage: `url(${background})` }}
+         className="min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center">
+         
+  <div className="bg-white/55 p-8 rounded-2xl shadow-lg w-96">
     <h1 className="text-3xl font-bold text-center mb-6">Sign Up</h1>
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
       {/* role */}
