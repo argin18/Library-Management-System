@@ -1,47 +1,72 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../component/Header";
 import Nav from "../component/Nav";
 import Card from "../component/Card";
 import Footer from "../component/Footer";
 
-const cardData=[
-   { title: "Total Books", value: 1200, color: "text-blue-700" },
-  { title: "Total Members", value: 120, color: "text-blue-700" },
-  { title: "Issued Books", value: 100, color: "text-orange-600" },
-  { title: "Available Books", value: 1100, color: "text-green-600" },
-
-]
-
-const recent=[
-  { id: "B101", name: "Java Programming", member: "Argin Bhujel", issueDate: "2082-08-25", returnDate: "2082-09-12" },
-    { id: "B102", name: "Java Script", member: "Manish Dhakal", issueDate: "2082-08-27", returnDate: "2082-09-10" },
-    { id: "B103", name: "React JS ", member: "Shrinkhala Dhakal", issueDate: "2082-08-28", returnDate: "2082-09-15" },
- 
-]
 const Dashboard = () => {
+  const [books, setBooks] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [issues, setIssues] = useState([]);
+
+  const [recentIssues, setRecentIssues] = useState([]);
+  const [recentMembers, setRecentMembers] = useState([]);
+
+  
+  
+  
+ useEffect(() => {
+  const update = () => {
+    const books = JSON.parse(localStorage.getItem("books")) || [];
+    const members = JSON.parse(localStorage.getItem("members")) || [];
+    const issues = JSON.parse(localStorage.getItem("issues")) || [];
+
+    setBooks(books);
+    setMembers(members);
+    setIssues(issues);
+    setRecentIssues(issues.slice(-5));
+    setRecentMembers(members.slice(-5));
+  };
+
+  update();
+
+  // Listen for changes from Issue/Return components
+  window.addEventListener("localStorageUpdate", update);
+
+  return () => {
+    window.removeEventListener("localStorageUpdate", update);
+  };
+}, []);
+
+
+  const cardData = [
+    { title: "Total Books", value: books.length, color: "text-blue-700" },
+    { title: "Total Members", value: members.length, color: "text-blue-700" },
+    { title: "Issued Books", value: issues.length, color: "text-orange-600" },
+    {
+      title: "Available Books",
+      value: books.filter(b => b.status === "Available").length,
+      color: "text-green-600",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
       <Header />
 
-      {/* Body */}
       <div className="flex">
-        {/* Sidebar */}
-        <Nav/>
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {/* Stats Cards */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-            {
-              cardData.map((data,idx)=>(
-                <Card key={idx} title={data.title} value={data.value} color={data.color} />
-            
-              ))
-            }
-            </section>
+        <Nav />
 
-          {/* Table */}
-          <section>
+        <main className="flex-1 p-6">
+          {/* Cards */}
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            {cardData.map(card => (
+              <Card key={card.title} {...card} />
+            ))}
+          </section>
+
+          {/* Recently Issued Books */}
+          <section className="mb-8">
             <h2 className="text-2xl font-bold text-gray-700 mb-4">
               Recently Issued Books
             </h2>
@@ -51,22 +76,66 @@ const Dashboard = () => {
                 <thead className="bg-gray-200">
                   <tr>
                     <th className="p-3 text-left">Book ID</th>
-                    <th className="p-3 text-left">Book Name</th>
-                    <th className="p-3 text-left">Member</th>
+                    <th className="p-3 text-left">User ID</th>
                     <th className="p-3 text-left">Issue Date</th>
-                    <th className="p-3 text-left">Return Date</th>
+                    <th className="p-3 text-left">Due Date</th>
                   </tr>
                 </thead>
                 <tbody>
-                 {recent.map((i,idx)=>(
-                   <tr key={idx} className="border-t hover:bg-gray-100">
-                    <td className="p-3">{i.id}</td>
-                    <td className="p-3">{i.name}</td>
-                    <td className="p-3">{i.member}</td>
-                    <td className="p-3">{i.issueDate}</td>
-                    <td className="p-3">{i.returnDate}</td>
+                  {recentIssues.length ? (
+                    recentIssues.map(issue => (
+                      <tr key={issue.bookid} className="border-t">
+                        <td className="p-3">{issue.bookid}</td>
+                        <td className="p-3">{issue.userId}</td>
+                        <td className="p-3">{issue.issuedAt}</td>
+                        <td className="p-3">{issue.dueDate}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center p-4 text-gray-500">
+                        No issued books found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* Recently Added Members */}
+          <section>
+            <h2 className="text-2xl font-bold text-gray-700 mb-4">
+              Recently Added Members
+            </h2>
+
+            <div className="overflow-x-auto">
+              <table className="w-full bg-white rounded-lg shadow">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="p-3 text-left">Member ID</th>
+                    <th className="p-3 text-left">Name</th>
+                    <th className="p-3 text-left">Email</th>
+                    <th className="p-3 text-left">Phone</th>
                   </tr>
-                 ))}
+                </thead>
+                <tbody>
+                  {recentMembers.length ? (
+                    recentMembers.map(m => (
+                      <tr key={m.id} className="border-t">
+                        <td className="p-3">{m.id}</td>
+                        <td className="p-3">{m.name}</td>
+                        <td className="p-3">{m.email}</td>
+                        <td className="p-3">{m.phone}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="4" className="text-center p-4 text-gray-500">
+                        No members found
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -74,8 +143,7 @@ const Dashboard = () => {
         </main>
       </div>
 
-      {/* Footer */}
-      <Footer/>
+      <Footer />
     </div>
   );
 };
