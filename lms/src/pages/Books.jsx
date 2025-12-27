@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import Header from "../component/Header";
 import Nav from "../component/Nav";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PopUp from "../component/PopUp";
 import Footer from "../component/Footer";
 let bookData = [
@@ -24,12 +24,17 @@ let bookData = [
   },
 ];
 const Books = () => {
-  const [books, setBooks] = useState(bookData);
+  const [books, setBooks] = useState(()=>{
+    return JSON.parse(localStorage.getItem("books"))|| bookData;
+  });
   const [open, setOpen] = useState(false);
   const [data, setData] = useState(null);
   const [mode, setMode] = useState("");
   const [search, setSearch] = useState("");
-  const [num, setNum] = useState(2);
+  const [num, setNum] = useState(() => {
+  const savedBooks = JSON.parse(localStorage.getItem("books")) || [];
+  return savedBooks.length ? Math.max(...savedBooks.map(b => b.id)) + 1 : 2;
+});
   const [form, setForm] = useState({
     name: "",
     type: "",
@@ -39,6 +44,10 @@ const Books = () => {
     price: "",
     date: "",
   });
+
+  useEffect(()=>{
+    localStorage.setItem("books", JSON.stringify(books));
+  },[books]);
 
   const openPopUp = (type, book = null) => {
     setMode(type);
@@ -75,7 +84,8 @@ const Books = () => {
   const filterBook = books.filter(
     (b) =>
       b.name.toLowerCase().includes(search.toLowerCase()) ||
-      b.type.toLowerCase().includes(search.toLowerCase())
+      b.type.toLowerCase().includes(search.toLowerCase())||
+      b.id.toString().includes(search)
   );
 
   const handleChange = (e) => {
@@ -103,7 +113,7 @@ const Books = () => {
   };
 
   const editBook = (e) => {
-    e.preventDefault(e);
+    e.preventDefault();
 
     const update = books.map((b) =>
       b.id === data.id
@@ -158,7 +168,7 @@ const Books = () => {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   type="text"
-                  placeholder="Search by Name or Type"
+                  placeholder="Search by Name or ID or Type"
                   className="outline-none text-sm w-full"
                 />
               </div>
@@ -265,10 +275,10 @@ const Books = () => {
             </>
           )}
 
-          {mode === "edit" && (
+          {(mode === "edit" || mode==="add") && (
             <>
               <form
-                onSubmit={editBook}
+                onSubmit={mode==="add"? addBook: editBook }
                 action=""
                 className="p-2 rounded-xl shadow bg-gray-100 gap-2 grid justify-center "
               >
@@ -345,9 +355,9 @@ const Books = () => {
                 <div className="flex justify-center">
                   <button
                     type="submit"
-                    className=" text-xl font-mono mb-2 cursor-pointer justify-center items-center bg-green-700 text-white px-4 py-2 rounded-lg shadow active:scale-95 w-full sm:w-auto"
+                    className={` text-xl font-mono mb-2 cursor-pointer justify-center items-center text-white px-4 py-2 rounded-lg shadow active:scale-95 w-full sm:w-auto ${mode=== "add"? "bg-green-600":"bg-blue-600"}`}
                   >
-                    Update
+                   {mode==="add"? "Add": "Update"}
                   </button>
                 </div>
               </form>
@@ -368,94 +378,7 @@ const Books = () => {
               </div>
             </>
           )}
-          {mode === "add" && (
-            <>
-              <form
-                onSubmit={addBook}
-                action=""
-                className="p-2 rounded-xl shadow bg-gray-100 gap-2 grid justify-center "
-              >
-                <div className="grid justify-start text-lg font-semibold">
-                  <label htmlFor="">Book name :</label>
-                  <input required
-                    name="name"
-                    value={form.name}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="C-Programming"
-                    className="border rounded-lg outline-none hover:border-gray-600 p-1"
-                  />
-                </div>
-                <div className="grid justify-start text-lg font-semibold">
-                  <label htmlFor="">Book Type :</label>
-                  <input required
-                    name="type"
-                    value={form.type}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Programming"
-                    className="border rounded-lg outline-none hover:border-gray-600 p-1"
-                  />
-                </div>
-
-                <div className="grid gap-1 justify-start text-lg font-semibold">
-                  <label htmlFor="">Author :</label>
-                  <input required
-                    name="author"
-                    value={form.author}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Sumit Bhujel"
-                    className="border rounded-lg outline-none hover:border-gray-600 p-1"
-                  />
-                </div>
-
-                <div className="grid gap-1 justify-start text-lg font-semibold">
-                  <label htmlFor="">Publication :</label>
-                  <input required
-                    name="publication"
-                    value={form.publication}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Asmita publication"
-                    className="border rounded-lg outline-none hover:border-gray-600 p-1"
-                  />
-                </div>
-
-                <div className="grid gap-1 justify-start text-lg font-semibold">
-                  <label htmlFor="">Language :</label>
-                  <input required
-                    name="language"
-                    value={form.language}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="English"
-                    className="border rounded-lg outline-none hover:border-gray-600 p-1"
-                  />
-                </div>
-
-                <div className="grid gap-1 justify-start text-lg font-semibold">
-                  <label htmlFor="">price :</label>
-                  <input required
-                    name="price"
-                    value={form.price}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Rs,400"
-                    className="border rounded-lg outline-none hover:border-gray-600 p-1"
-                  />
-                </div>
-                <div className="flex justify-center">
-                  <button
-                    type="submit"
-                    className=" text-xl font-mono mb-2 cursor-pointer justify-center items-center bg-green-700 text-white px-4 py-2 rounded-lg shadow active:scale-95 w-full sm:w-auto"
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </>
-          )}
+          
         </PopUp>
       )}
       {/* Footer */}
