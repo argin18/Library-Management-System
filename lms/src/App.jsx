@@ -15,7 +15,7 @@ const App = () => {
   return (
     <div className="bg-gray-200">
       
-        <Routes>
+        {/* <Routes>
         <Route path="/startPage/*" element={<StartPage  />}></Route>
 
       {isLogin ?(
@@ -30,6 +30,15 @@ const App = () => {
       ):(
         <Route path="*" element={<Navigate to="/startPage/login"/>}/>
       )}
+      </Routes> */}
+      <Routes>
+        <Route path="/" element={<Dashboard />}></Route>
+        <Route path="/books" element={<Books />}></Route>
+        <Route path="/member" element={<Member />}></Route>
+        <Route path="/issue" element={<Issue />}></Route>
+        <Route path="/return" element={<Return />}></Route>
+        <Route path="/report" element={<Report />}></Route>
+        
       </Routes>
     </div>
   );
