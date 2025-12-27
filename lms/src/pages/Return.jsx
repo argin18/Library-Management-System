@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {  useState } from "react";
 import Header from "../component/Header";
 import Nav from "../component/Nav";
 import { Search, RotateCcw } from "lucide-react";
@@ -6,21 +6,21 @@ import Footer from "../component/Footer";
 import PopUp from "../component/PopUp";
 import NepaliDate from "nepali-date-converter";
 
-const returnData = [
-  {
-    issueId: "I101",
-    userId: "U201",
-    bookId: "B301",
-    issueDate: "2082-08-20",
-    dueDate: "2082-09-12",
-  },
-];
 
 const Return = () => {
+  const todayBS = new NepaliDate(new Date()).format("YYYY-MM-DD");
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [data, setData] = useState(null);
-  const [returnList, setReturnList] = useState(returnData)
+  const [returnList, setReturnList] = useState(()=>{
+    try{
+    const stored = JSON.parse(localStorage.getItem("issues"));
+    return stored ? stored : [];
+    }catch{
+      return []
+    }
+  })
+
 
   const openPopUp = (issue) => {
     setData(issue);
@@ -45,17 +45,52 @@ const Return = () => {
   const filteredData = returnList.filter(
     (i) =>
       i.userId.toLowerCase().includes(search.toLowerCase()) ||
-      i.bookId.toLowerCase().includes(search.toLowerCase()) ||
-      i.issueId.toLowerCase().includes(search.toLowerCase())
+      i.bookid.toString().includes(search) ||
+      i.id.toString().includes(search)
   );
 
-  const confirm=()=>{
-    if(data){
-      setReturnList(returnList.filter(i=>i.issueId !== data.issueId));
-      setOpen(false)
-    setData(null)
-    }
-  }
+  const confirm = () => {
+  if (!data) return;
+let dailyReports = JSON.parse(localStorage.getItem("reports")) || [];
+
+  // Remove issue
+  const updatedIssues = returnList.filter((i) => i.id !== data.id);
+  setReturnList(updatedIssues);
+  localStorage.setItem("issues", JSON.stringify(updatedIssues));
+
+  // Update book status to Available
+  const allBooks = JSON.parse(localStorage.getItem("books")) || [];
+  const updatedBooks = allBooks.map((b) =>
+    b.id === data.bookid ? { ...b, status: "Available" } : b
+  );
+  localStorage.setItem("books", JSON.stringify(updatedBooks));
+// retort section
+  let todayReport = dailyReports.find((r) => r.date === todayBS && r.type === "Returned Books");
+
+if (todayReport) {
+  todayReport.value += Number(data.books || 1); // increment returned books
+  todayReport.detail = `Total ${todayReport.value} books were returned today.`;
+} else {
+  dailyReports.push({
+    id: Date.now(),
+    type: "Returned Books",
+    description: "Books returned today",
+    date: todayBS,
+    value: Number(data.books || 1),
+     detail: `Total ${data.books || 1} book${data.books > 1 ? "s" : ""} were returned today.`
+  });
+}
+
+localStorage.setItem("reports", JSON.stringify(dailyReports));
+
+  // Close popup
+  setOpen(false);
+  setData(null);
+
+  // Trigger Dashboard update
+  window.dispatchEvent(new Event("localStorageUpdate"));
+};
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -99,11 +134,11 @@ const Return = () => {
 
               <tbody>
                 {filteredData.map((i) => (
-                  <tr key={i.issueId} className="border-t hover:bg-gray-50">
-                    <td className="p-3">{i.issueId}</td>
+                  <tr key={i.id} className="border-t hover:bg-gray-50">
+                    <td className="p-3">{i.id}</td>
                     <td className="p-3">{i.userId}</td>
-                    <td className="p-3">{i.bookId}</td>
-                    <td className="p-3">{i.issueDate}</td>
+                    <td className="p-3">{i.bookid}</td>
+                    <td className="p-3">{i.issuedAt}</td>
                     <td className="p-3">{i.dueDate}</td>
                     <td className="p-3">
                       {isOverdue(i.dueDate) ? (
@@ -144,13 +179,13 @@ const Return = () => {
       {open && (
         <PopUp title="Confirm Book Return" onclose={closePopUp}>
           <p>
-            Issue ID: <b>{data.issueId}</b>
+            Issue ID: <b>{data.id}</b>
           </p>
           <p>
             User ID: <b>{data.userId}</b>
           </p>
           <p>
-            Book ID: <b>{data.bookId}</b>
+            Book ID: <b>{data.bookid}</b>
           </p>
           <p>
             Due Date: <b>{data.dueDate}</b>
