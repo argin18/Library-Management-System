@@ -5,6 +5,7 @@ import { CalendarDays, FileText, X } from "lucide-react";
 import Card from "../component/Card";
 import PopUp from "../component/PopUp";
 import Footer from "../component/Footer";
+import NepaliDate from "nepali-date-converter";
 
 const reportCard = [
   { title: "Total Books", value: 1200, color: "text-blue-700" },
@@ -12,22 +13,6 @@ const reportCard = [
   { title: "Returned Books", value: 150, color: "text-green-600" },
 ];
 
-const reportData = [
-  {
-    id: "R101",
-    type: "Issued Books",
-    description: "List of issued books",
-    date: "2025-08-20",
-    detail: "Total 180 books were issued during the selected period.",
-  },
-  {
-    id: "R102",
-    type: "Returned Books",
-    description: "List of returned books",
-    date: "2025-08-20",
-    detail: "150 books were returned successfully.",
-  },
-];
 
 const Report = () => {
   const [open, setOpen] = useState(false);
@@ -35,6 +20,10 @@ const Report = () => {
   const [starDate, setStarDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const todayBS= new NepaliDate(new Date()).format("YYYY-MM-DD")
+ const reportData = JSON.parse(localStorage.getItem("reports")) || [];
+
+  
   const openPopUp = (report) => {
     setData(report);
     setOpen(true);
@@ -46,11 +35,11 @@ const Report = () => {
   };
 
   const filter = reportData.filter((d) => {
-    const dataDate = new Date(d.date);
-    return (
-      (!starDate || dataDate >= new Date(starDate)) &&
-      (!endDate || dataDate <= new Date(endDate))
-    );
+   const dataDate = new Date(d.date + "T00:00:00");
+  const start = starDate ? new Date(starDate + "T00:00:00") : null;
+  const end = endDate ? new Date(endDate + "T23:59:59") : null;
+
+  return (!start || dataDate >= start) && (!end || dataDate <= end);
   });
   return (
     <div className="min-h-screen bg-gray-100">
@@ -108,8 +97,8 @@ const Report = () => {
 
               <tbody>
                 {filter.length ? (
-                  filter.map((d, idx) => (
-                    <tr key={idx} className="border-t hover:bg-gray-50">
+                  filter.map((d) => (
+                    <tr key={d.id} className="border-t hover:bg-gray-50">
                       <td className="p-3">{d.id}</td>
                       <td className="p-3">{d.type}</td>
                       <td className="p-3">{d.description}</td>
