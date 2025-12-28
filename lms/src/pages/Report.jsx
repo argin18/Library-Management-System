@@ -1,17 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "../component/Header";
 import Nav from "../component/Nav";
 import { CalendarDays, FileText, X } from "lucide-react";
 import Card from "../component/Card";
 import PopUp from "../component/PopUp";
 import Footer from "../component/Footer";
-import NepaliDate from "nepali-date-converter";
-
-const reportCard = [
-  { title: "Total Books", value: 1200, color: "text-blue-700" },
-  { title: "Issued Books", value: 180, color: "text-orange-600" },
-  { title: "Returned Books", value: 150, color: "text-green-600" },
-];
 
 
 const Report = () => {
@@ -19,11 +12,39 @@ const Report = () => {
   const [data, setData] = useState(null);
   const [starDate, setStarDate] = useState("");
   const [endDate, setEndDate] = useState("");
-
-  const todayBS= new NepaliDate(new Date()).format("YYYY-MM-DD")
- const reportData = JSON.parse(localStorage.getItem("reports")) || [];
-
+  const [books, setBooks] = useState([]);
+  const [issues, setIssues] = useState([]);
+    const [returns, setReturns] = useState([]);
+   
+  const reportData = JSON.parse(localStorage.getItem("reports")) || [];
   
+  useEffect(() => {
+    const update = () => {
+      const books = JSON.parse(localStorage.getItem("books")) || [];
+      const returns = JSON.parse(localStorage.getItem("returns")) || [];
+      const issues = JSON.parse(localStorage.getItem("issues")) || [];
+  
+      setBooks(books);
+      setReturns(returns);
+      setIssues(issues);
+    };
+  
+    update();
+  
+    // Listen for changes from Issue/Return components
+    window.addEventListener("localStorageUpdate", update);
+  
+    return () => {
+      window.removeEventListener("localStorageUpdate", update);
+    };
+  }, []);
+
+  const reportCard = [
+    { title: "Total Books", value: books.length, color: "text-blue-700" },
+    { title: "Issued Books", value: issues.length, color: "text-orange-600" },
+    { title: "Returned Books", value: returns.length, color: "text-green-600" },
+  ];
+
   const openPopUp = (report) => {
     setData(report);
     setOpen(true);
@@ -76,11 +97,17 @@ const Report = () => {
           </div>
 
           {/*  Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+          {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
             {reportCard.map((c, idx) => (
               <Card key={idx} title={c.title} value={c.value} color={c.color} />
             ))}
-          </div>
+          </div> */}
+
+          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+            {reportCard.map(card => (
+              <Card key={card.title} {...card} />
+            ))}
+          </section>
 
           {/* Table */}
           <div className="overflow-x-auto rounded-xl">
@@ -101,7 +128,7 @@ const Report = () => {
                     <tr key={d.id} className="border-t hover:bg-gray-50">
                       <td className="p-3">{d.id}</td>
                       <td className="p-3">{d.type}</td>
-                      <td className="p-3">{d.description}</td>
+                      <td className="p-3">{d.detail}</td>
                       <td className="p-3">{d.date}</td>
                       <td className="p-3">
                         <button

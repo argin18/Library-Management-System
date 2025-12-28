@@ -21,6 +21,13 @@ const Return = () => {
     }
   })
 
+  const [returns, setReturns] = useState(()=>{
+    try{
+      return JSON.parse(localStorage.getItem("returns"))||[]
+    }catch{
+      return []
+    }
+  })
 
   const openPopUp = (issue) => {
     setData(issue);
@@ -64,6 +71,23 @@ let dailyReports = JSON.parse(localStorage.getItem("reports")) || [];
     b.id === data.bookid ? { ...b, status: "Available" } : b
   );
   localStorage.setItem("books", JSON.stringify(updatedBooks));
+
+  //return storege
+  const updateReturns=[
+    ...returns,
+    {
+      id: Date.now(),
+    issueId: data.id,
+    userId: data.userId,
+    bookid: data.bookid,
+    returnedAt: todayBS,
+    dueDate: data.dueDate,
+    issuedAt: data.issuedAt,
+    },
+  ]
+
+  setReturns(updateReturns)
+  localStorage.setItem("returns", JSON.stringify(updateReturns))
 // retort section
   let todayReport = dailyReports.find((r) => r.date === todayBS && r.type === "Returned Books");
 

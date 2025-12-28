@@ -13,12 +13,11 @@ const Issue = () => {
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("issued");
   const [form, setForm] = useState({
-  bookid: "",
-  userId: "",
-  books: "",
-  dueDate: "",
-});
-
+    bookid: "",
+    userId: "",
+    books: "",
+    dueDate: "",
+  });
 
   const [issues, setIssues] = useState(
     JSON.parse(localStorage.getItem("issues")) || [
@@ -38,6 +37,11 @@ const Issue = () => {
   }, [issues]);
 
   const todayBS = new NepaliDate(new Date()).format("YYYY-MM-DD");
+
+  //convert AD to Bs
+  const toBS = (adDate) => {
+    return new NepaliDate(new Date(adDate)).format("YYYY-MM-DD");
+  };
 
   const openPopUp = (issue) => {
     if (issue === "add") {
@@ -74,56 +78,57 @@ const Issue = () => {
     }
   };
 
- const handleAddIssue = (e) => {
-   e.preventDefault();
-   let dailyReports = JSON.parse(localStorage.getItem("reports")) || [];
+  const handleAddIssue = (e) => {
+    e.preventDefault();
+    let dailyReports = JSON.parse(localStorage.getItem("reports")) || [];
 
-  const newIssue = {
-    id: Date.now(),
-    ...form,
-    bookid: Number(form.bookid),
-    issuedAt: todayBS,
-    issueTime: new Date().toLocaleTimeString(),
-    detail: `Book issued to user ${form.userId}`,
+    const newIssue = {
+      id: Date.now(),
+      ...form,
+      bookid: Number(form.bookid),
+      issuedAt: todayBS,
+      issueTime: new Date().toLocaleTimeString(),
+      detail: `Book issued to user ${form.userId}`,
+    };
+
+    // Save issue
+    const updatedIssues = [...issues, newIssue];
+    setIssues(updatedIssues);
+    localStorage.setItem("issues", JSON.stringify(updatedIssues));
+
+    // Update book status
+    const allBooks = JSON.parse(localStorage.getItem("books")) || [];
+    const updatedBooks = allBooks.map((b) =>
+      b.id === Number(form.bookid) ? { ...b, status: "Issued" } : b
+    );
+    localStorage.setItem("books", JSON.stringify(updatedBooks));
+    // update daily report
+    let todayReport = dailyReports.find(
+      (r) => r.date === todayBS && r.type === "Issued Books"
+    );
+
+    if (todayReport) {
+      todayReport.value += Number(form.books);
+      todayReport.detail = `Total ${todayReport.value} books were issued today.`;
+    } else {
+      dailyReports.push({
+        id: Date.now(),
+        type: "Issued Books",
+        description: "Books issued today",
+        date: todayBS,
+        value: Number(form.books),
+        detail: `Total ${form.books} books were issued today.`,
+      });
+    }
+    localStorage.setItem("reports", JSON.stringify(dailyReports));
+
+    // Reset form and close popup
+    setOpen(false);
+    setForm({ bookid: "", userId: "", books: "", dueDate: "" });
+
+    // Trigger Dashboard update
+    window.dispatchEvent(new Event("localStorageUpdate"));
   };
-
-  // Save issue
-  const updatedIssues = [...issues, newIssue];
-  setIssues(updatedIssues);
-  localStorage.setItem("issues", JSON.stringify(updatedIssues));
-
-  // Update book status
-  const allBooks = JSON.parse(localStorage.getItem("books")) || [];
-  const updatedBooks = allBooks.map((b) =>
-    b.id === Number(form.bookid) ? { ...b, status: "Issued" } : b
-  );
-  localStorage.setItem("books", JSON.stringify(updatedBooks));
-// update daily report
-  let todayReport=dailyReports.find((r)=>r.date === todayBS && r.type=== "Issued Books")
-
-  if(todayReport){
-    todayReport.value+=Number(form.books)
-    todayReport.detail=`Total ${todayReport.value} books were issued today.`
-  }else {
-  dailyReports.push({
-    id: Date.now(),
-    type: "Issued Books",
-    description: "Books issued today",
-    date: todayBS,
-    value: Number(form.books),
-    detail: `Total ${form.books} books were issued today.`
-  });
-}
-localStorage.setItem("reports", JSON.stringify(dailyReports));
-
-  // Reset form and close popup
-  setOpen(false);
-  setForm({ bookid: "", userId: "", books: "", dueDate: "" });
-
-  // Trigger Dashboard update
-  window.dispatchEvent(new Event("localStorageUpdate"));
-};
-
 
   const filteredData = issues.filter((item) => {
     const match =
@@ -136,7 +141,6 @@ localStorage.setItem("reports", JSON.stringify(dailyReports));
     return match;
   });
 
-  
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -149,13 +153,13 @@ localStorage.setItem("reports", JSON.stringify(dailyReports));
           <div className="flex bg-gray-200 justify-between items-center p-4 rounded-lg mb-4">
             {/* Tabs */}
             <div className="flex gap-3">
-            <button
-              onClick={() => openPopUp("add")}
-              className="flex gap-2 mr-3 cursor-pointer justify-center items-center bg-red-600 text-white px-4 py-2 rounded-lg shadow active:scale-95 active:bg-red-400 w-full sm:w-auto"
-            >
-              <CirclePlus className="bg-white text-black rounded-full p-1" />
-              Issue Book
-            </button>
+              <button
+                onClick={() => openPopUp("add")}
+                className="flex gap-2 mr-3 cursor-pointer justify-center items-center bg-red-600 text-white px-4 py-2 rounded-lg shadow active:scale-95 active:bg-red-400 w-full sm:w-auto"
+              >
+                <CirclePlus className="bg-white text-black rounded-full p-1" />
+                Issue Book
+              </button>
               <button
                 onClick={() => setTab("issued")}
                 className={`px-4 py-2 cursor-pointer active:scale-95 active:bg-blue-500 rounded-lg shadow ${
@@ -314,15 +318,16 @@ localStorage.setItem("reports", JSON.stringify(dailyReports));
               />
 
               <input
-                type="date"
+                type="text"
                 name="dueDate"
                 value={form.dueDate}
                 onChange={handleChange}
+                placeholder="YYYY-MM-DD (BS)"
                 required
                 className="border p-2 rounded"
               />
 
-              <button className="bg-green-600 text-white p-2 rounded">
+              <button className="bg-green-600 cursor-pointer text-white p-2 rounded">
                 Issue Book
               </button>
             </form>

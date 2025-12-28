@@ -83,6 +83,7 @@ const Header = () => {
       )}
       {open && (
         <PopUp title="Librarien Detail" onclose={closePopUp}>
+
           <p>
             User Name: <b>{data?.name}</b>{" "}
           </p>
