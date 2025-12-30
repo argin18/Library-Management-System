@@ -31,7 +31,7 @@ const Header = () => {
   };
   return (
     <>
-      <header className="bg-white shadow text-black px-6 py-4 flex justify-between items-center">
+      <header className="bg-white fixed top-0 left-0 w-full z-50 shadow text-black px-6 py-4 flex justify-between items-center">
         <h1 className="text-3xl font-bold">Hamro Library</h1>
         <ul className="flex gap-6 text-lg">
           <li className="cursor-pointer hover:underline">
