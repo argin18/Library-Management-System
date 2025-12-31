@@ -54,7 +54,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100">
       <Header />
 
-      <div className="flex">
+      <div className="flex pt-17">
         <Nav />
 
         <main className="flex-1 p-6">
