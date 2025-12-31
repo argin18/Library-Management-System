@@ -66,7 +66,7 @@ const Report = () => {
     <div className="min-h-screen bg-gray-100">
       <Header />
 
-      <div className="flex">
+      <div className="flex pt-17">
         <Nav />
 
         <div className="flex-1 p-6">

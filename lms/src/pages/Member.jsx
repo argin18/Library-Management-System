@@ -132,7 +132,7 @@ const Member = () => {
       <div className="min-h-screen bg-gray-100">
         <Header />
 
-        <div className="flex flex-row md:flex-row">
+        <div className="flex pt-17 flex-row md:flex-row">
           <Nav />
 
           <div className="flex-1 p-4 md:p-6">
